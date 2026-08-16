@@ -19,6 +19,8 @@ jobs:
                       dependencies: highest
                     - php: '8.4'
                       dependencies: highest
+                    - php: '8.5'
+                      dependencies: highest
         steps:
             - uses: actions/checkout@v4
 
