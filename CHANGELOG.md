@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 – noch nicht veröffentlicht
+## 1.0.0 – 16.08.2026
 
 Erste Fassung. Herausgelöst aus www.sn-plus.de, wo dieselbe Sache zuvor als
 Projektcode lag, und aus kreativundsoehne.de, wo eine ältere Variante läuft.
