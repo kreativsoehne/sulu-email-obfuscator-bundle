@@ -48,6 +48,10 @@ final readonly class EmailObfuscatorRuntime implements RuntimeExtensionInterface
      * Markup that may hold addresses. Only needed where the response listener is
      * off - with the listener on, this filter is harmless: it marks what it
      * shifts, and marked links are left alone the second time round.
+     *
+     * The return value is markup and is not escaped afterwards. This filter
+     * therefore belongs where "|raw" stood before, never on unchecked input - it
+     * neither escapes nor sanitises anything, it only shifts addresses.
      */
     public function html(?string $html): Markup
     {

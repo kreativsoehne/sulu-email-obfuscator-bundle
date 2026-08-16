@@ -40,20 +40,42 @@ final readonly class EmailObfuscator
     private const ADDRESS = '[\w.+-]+@[\w-]+(?:\.[\w-]+)+';
 
     /**
+     * The inside of a tag, up to the closing angle bracket: either an ordinary
+     * character or a quoted value. The quoted part is what matters - an attribute
+     * may legally contain an angle bracket (alt="more > less"), and a scanner that
+     * stops at the first one would end the tag in the middle and treat the rest of
+     * the attributes as text. There is no ambiguity between the alternatives, they
+     * are told apart by their first character, so this stays linear.
+     */
+    private const INSIDE_TAG = '(?:[^>"\']|"[^"]*"|\'[^\']*\')';
+
+    /**
+     * Elements whose content is text, not markup. A link written into them would
+     * show up as literal characters in a form field or a browser tab.
+     */
+    private const RAW_TEXT = 'script|style|textarea|title';
+
+    /**
      * One pass over the markup. The order of the branches is the statement:
-     * scripts, styles and every tag are consumed as a whole and passed through
-     * untouched, so an address inside an attribute is never rewritten. Only what
-     * is left over is text, and only there does the last branch apply.
+     * comments, raw text elements, links and every other tag are consumed as a
+     * whole and passed through untouched. Only what is left over is text, and only
+     * there does the last branch apply.
      *
      * Leaving scripts alone also keeps structured data (JSON-LD) intact. An
      * address repeated in a FAQPage or Organization block therefore stays
      * readable - see the README.
+     *
+     * The second link branch is the one without mailto. Its content is passed
+     * through because a link inside a link is not markup a browser can keep: it
+     * closes the outer one, and the page loses the link it had. An address used as
+     * the label of another link therefore stays readable.
      */
     private const PATTERN = '~
-          <script\b[^>]*>.*?</script>
-        | <style\b[^>]*>.*?</style>
-        | <a\b(?<before>[^>]*?)href=(?<quote>["\'])mailto:(?<target>[^"\']*)(?P=quote)(?<after>[^>]*)>(?<label>.*?)</a>
-        | <[^>]+>
+          <!--.*?-->
+        | <(?<raw>' . self::RAW_TEXT . ')\b' . self::INSIDE_TAG . '*>.*?</(?P=raw)\s*>
+        | <a\b(?<before>' . self::INSIDE_TAG . '*?)href=(?<quote>["\'])mailto:(?<target>[^"\']*)(?P=quote)(?<after>' . self::INSIDE_TAG . '*)>(?<label>.*?)</a\s*>
+        | <a\b' . self::INSIDE_TAG . '*>.*?</a\s*>
+        | <[a-zA-Z!/?]' . self::INSIDE_TAG . '*>
         | (?<plain>' . self::ADDRESS . ')
     ~isx';
 

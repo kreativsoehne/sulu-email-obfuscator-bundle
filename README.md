@@ -8,7 +8,7 @@ Der Unterschied zu den üblichen Twig-Filtern: **es gibt nichts einzubauen.** Da
 
 - **Umgeschrieben wird die Antwort**, spät im `kernel.response` und vor dem HTTP-Cache. Was im Cache landet, ist bereits verdreht.
 - **Nur im Website-Kontext.** Sulu betreibt Backend und Auftritt aus einer Codebasis und unterscheidet sie über `sulu.context`; daran hängt die Registrierung. Das Backend bleibt unangetastet — ein Eingabefeld muss die Adresse zeigen, die die Redaktion getippt hat.
-- **Die Vorschau zeigt die echte Adresse.** Sulu rendert sie im Admin-Kontext. Das ist gewollt: die Redaktion prüft Inhalte, keine Verschleierung.
+- **Die Vorschau zeigt die echte Adresse.** Sulu rendert sie zwar mit einem Website-Kernel, markiert die Anfrage aber mit dem Attribut `preview`; daran erkennt der Listener sie und lässt sie liegen. Zweimal richtig so: die Redaktion prüft Inhalte, und die Vorschau tauscht beim Tippen Teile des Dokuments aus — darin eingesetzte Skripte laufen nicht, verdrehte Adressen blieben also stehen.
 - **Verdrehte Verweise tragen `data-obfuscated-email`.** Daran erkennt das Skript sie im Browser, und daran erkennt der Umschreiber, was er schon bearbeitet hat. Zweimal angewendet ändert also nichts.
 - **Beschriftungen bleiben lesbar**, außer sie sind selbst eine Adresse. „Schreib uns" bleibt „Schreib uns"; Browser und Server halten sich an dieselbe Regel.
 - **Skripte und Stile bleiben unberührt.** Eine Adresse in einem Attribut wird nie angefasst, sonst zerfiele das Markup.
@@ -62,6 +62,8 @@ Gebraucht nur, wo die Vorlage die Sache selbst in der Hand hat:
 ```
 
 Beides ist neben dem automatischen Umschreiben unschädlich: was die Marke trägt, wird kein zweites Mal angefasst.
+
+**`sulu_obfuscate_emails` gibt HTML zurück und wird deshalb nicht mehr maskiert.** Er gehört nur an Werte, die ohnehin als HTML ausgegeben werden — also dorthin, wo vorher `|raw` stand. An einer ungeprüften Eingabe steht er falsch: dann liefe der Text ungefiltert in die Seite. Für eine einzelne Adresse aus einem Textfeld ist `sulu_obfuscate_email` der richtige Filter, der maskiert wie jeder andere Wert.
 
 ## Was das Bundle nicht kann
 

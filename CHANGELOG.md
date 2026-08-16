@@ -12,3 +12,8 @@ Projektcode lag, und aus kreativundsoehne.de, wo eine ältere Variante läuft.
   zurückdrehen soll, der Umschreiber weiß, was er schon gesehen hat.
 - Beschriftungen, die keine Adresse sind, bleiben lesbar — auf beiden Seiten
   dieselbe Regel.
+- Die Vorschau bleibt unangetastet, erkannt am Attribut `preview` der Anfrage.
+  Sulu rendert sie mit einem Website-Kernel, der Kontext allein genügt also nicht.
+- Unberührt bleiben ausserdem Kommentare und die Elemente `script`, `style`,
+  `textarea` und `title`, deren Inhalt Text ist und kein Markup, sowie der Inhalt
+  von Verweisen ohne `mailto` — ein Verweis im Verweis überlebt das Parsen nicht.

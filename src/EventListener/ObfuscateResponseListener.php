@@ -91,6 +91,19 @@ final readonly class ObfuscateResponseListener
             return false;
         }
 
+        // The preview is not the website, even though Sulu renders it with a
+        // website kernel - it is the editors looking at their own content, and they
+        // have to see the address they typed. Sulu marks such a request with the
+        // attribute "preview"; the route name does not help here, because the
+        // preview runs under the route of the page it shows.
+        //
+        // It matters for a second reason: the preview replaces parts of the
+        // document while editing, and markup put in that way does not run scripts.
+        // Whatever the listener shifted there would stay unreadable.
+        if ($request->attributes->getBoolean('preview')) {
+            return false;
+        }
+
         $route = $request->attributes->get('_route');
 
         if (!\is_string($route)) {

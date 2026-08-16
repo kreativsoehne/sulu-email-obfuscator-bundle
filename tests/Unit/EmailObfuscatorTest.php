@@ -103,6 +103,77 @@ final class EmailObfuscatorTest extends TestCase
         $this->assertSame($html, $this->obfuscator->html($html));
     }
 
+    /**
+     * An attribute may legally hold an angle bracket. A scanner that ends the tag
+     * there reads the remaining attributes as text - and wrote the link into the
+     * href, which took the page apart.
+     */
+    public function testAngleBracketInAnAttributeDoesNotBreakTheTag(): void
+    {
+        $this->assertSame(
+            '<a title="A > B" href="mailto:vasb@rknzcyr.pbz" data-obfuscated-email>Write to us</a>',
+            $this->obfuscator->html('<a title="A > B" href="mailto:info@example.com">Write to us</a>'),
+        );
+    }
+
+    public function testAddressInAnAttributeBehindAnAngleBracketIsLeftAlone(): void
+    {
+        $html = '<img alt="more > less" src="x.png" title="info@example.com">';
+
+        $this->assertSame($html, $this->obfuscator->html($html));
+    }
+
+    /**
+     * A form field shows its content as characters. A link written into it would
+     * stand there as markup for everyone to read.
+     */
+    public function testTextareaIsLeftAlone(): void
+    {
+        $html = '<textarea>info@example.com</textarea>';
+
+        $this->assertSame($html, $this->obfuscator->html($html));
+    }
+
+    public function testTitleIsLeftAlone(): void
+    {
+        $html = '<title>Contact info@example.com</title>';
+
+        $this->assertSame($html, $this->obfuscator->html($html));
+    }
+
+    public function testCommentIsLeftAlone(): void
+    {
+        $html = '<!-- if a > b then info@example.com --><p>ok</p>';
+
+        $this->assertSame($html, $this->obfuscator->html($html));
+    }
+
+    /**
+     * A link inside a link is nothing a browser keeps: it closes the outer one,
+     * and the page loses the link it had. The address stays readable instead.
+     */
+    public function testAddressAsTheLabelOfAnotherLinkStaysAsItIs(): void
+    {
+        $html = '<a href="/contact">info@example.com</a>';
+
+        $this->assertSame($html, $this->obfuscator->html($html));
+    }
+
+    public function testUnclosedLinkKeepsItsAddressInTheAttribute(): void
+    {
+        $html = '<a href="mailto:info@example.com"><span>x</span>';
+
+        $this->assertSame($html, $this->obfuscator->html($html));
+    }
+
+    public function testUppercaseMarkupIsRecognised(): void
+    {
+        $this->assertSame(
+            '<a href="mailto:Vasb@Rknzcyr.pbz" data-obfuscated-email>Vasb@Rknzcyr.pbz</a>',
+            $this->obfuscator->html('<A HREF="MAILTO:Info@Example.com">Info@Example.com</A>'),
+        );
+    }
+
     public function testMarkupWithoutAddressIsUnchanged(): void
     {
         $html = '<p>Call us: <a href="tel:+4934112345">0341 12345</a></p>';

@@ -61,6 +61,29 @@ final class ObfuscateResponseListenerTest extends TestCase
         $this->assertSame($html, $this->handle($html, route: 'sulu_preview.render')->getContent());
     }
 
+    /**
+     * Sulu renders the preview with a website kernel, so the listener does see it.
+     * The request carries the attribute "preview", and that is what tells them
+     * apart - the route is the one of the page being shown.
+     */
+    public function testPreviewIsLeftAlone(): void
+    {
+        $html = '<html><body><p>info@example.com</p></body></html>';
+        $response = new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
+
+        $request = new Request();
+        $request->attributes->set('preview', true);
+
+        $this->listener()(new ResponseEvent(
+            $this->kernel(),
+            $request,
+            HttpKernelInterface::MAIN_REQUEST,
+            $response,
+        ));
+
+        $this->assertSame($html, $response->getContent());
+    }
+
     public function testDisabledListenerIsLeftAlone(): void
     {
         $html = '<html><body><p>info@example.com</p></body></html>';
