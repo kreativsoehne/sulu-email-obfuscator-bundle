@@ -1,0 +1,19 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    KreativSoehne\SuluEmailObfuscatorBundle\Obfuscator\EmailObfuscator:
+        arguments:
+            $linkPlainAddresses: '%sulu_email_obfuscator.link_plain_addresses%'
+
+    KreativSoehne\SuluEmailObfuscatorBundle\Obfuscator\DecoderScript:
+        arguments:
+            $mode: '%sulu_email_obfuscator.script%'
+
+    KreativSoehne\SuluEmailObfuscatorBundle\Twig\EmailObfuscatorExtension: ~
+
+    KreativSoehne\SuluEmailObfuscatorBundle\Twig\EmailObfuscatorRuntime:
+        arguments:
+            $enabled: '%sulu_email_obfuscator.enabled%'
+        tags: ['twig.runtime']

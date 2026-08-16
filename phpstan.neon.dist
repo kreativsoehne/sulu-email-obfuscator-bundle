@@ -1,0 +1,9 @@
+parameters:
+    # Lowest supported runtime, matching composer.json ("php": "^8.2")
+    phpVersion: 80200
+    level: max
+    paths:
+        - src
+        - tests
+        - rector.php
+    treatPhpDocTypesAsCertain: false

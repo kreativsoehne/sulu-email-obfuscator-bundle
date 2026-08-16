@@ -1,0 +1,40 @@
+name: Packagist
+
+# Packagist only crawls now and then. This tells it about a new commit or tag
+# right away, so "composer require" sees a release within seconds.
+#
+# Needs one repository secret:
+#   PACKAGIST_TOKEN  an API token from the Packagist profile, the "safe" one is
+#                    enough for this endpoint
+#
+# The user name is the maintainer of the package and therefore not a secret.
+# Set PACKAGIST_USERNAME as well to override it.
+
+on:
+    workflow_dispatch: ~
+    push:
+        branches: [main]
+        tags: ['v*']
+
+jobs:
+    update:
+        name: Notify Packagist
+        runs-on: ubuntu-latest
+        if: github.repository == 'kreativsoehne/sulu-email-obfuscator-bundle'
+        steps:
+            - name: Send update request
+              env:
+                  PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME || 'kreativsoehne' }}
+                  PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+              run: |
+                  if [ -z "$PACKAGIST_TOKEN" ]; then
+                      echo "No Packagist token stored, skipping. Packagist will pick the change up with its next crawl."
+                      exit 0
+                  fi
+
+                  curl --silent --show-error --fail \
+                      --request POST \
+                      --header 'Content-Type: application/json' \
+                      --header "Authorization: Bearer ${PACKAGIST_USERNAME}:${PACKAGIST_TOKEN}" \
+                      --data '{"repository":"https://github.com/kreativsoehne/sulu-email-obfuscator-bundle"}' \
+                      https://packagist.org/api/update-package

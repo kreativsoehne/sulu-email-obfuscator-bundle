@@ -1,0 +1,12 @@
+# Only loaded in the website context, see SuluEmailObfuscatorExtension.
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    KreativSoehne\SuluEmailObfuscatorBundle\EventListener\ObfuscateResponseListener:
+        arguments:
+            $enabled: '%sulu_email_obfuscator.enabled%'
+            $excludedRoutes: '%sulu_email_obfuscator.excluded_routes%'
+        tags:
+            - { name: kernel.event_listener, event: kernel.response, priority: -100 }
