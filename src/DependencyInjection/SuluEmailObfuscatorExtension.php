@@ -33,7 +33,7 @@ final class SuluEmailObfuscatorExtension extends Extension
         $container->setParameter('sulu_email_obfuscator.script', $config['script']);
         $container->setParameter('sulu_email_obfuscator.excluded_routes', $config['excluded_routes']);
 
-        $loader = new YamlFileLoader($container, new FileLocator(\dirname(__DIR__) . '/Resources/config'));
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
 
         // The listener belongs to the website, never to the administration
