@@ -158,12 +158,19 @@ final readonly class EmailObfuscator
             $target = \substr($target, 0, $separator);
         }
 
-        // Only shift the label if it is an address itself. A word ("write to us")
-        // stays readable, and the browser script follows the same rule.
+        // Only shift the label if its visible text is an address itself. A word
+        // ("write to us") stays readable, and the browser script follows the same
+        // rule. Markup inside the label (an icon, a span around the address) stays
+        // as it is; only the address in the text is shifted.
         $label = $matches['label'];
+        $visible = \trim(\html_entity_decode(\strip_tags($label), \ENT_QUOTES | \ENT_HTML5));
 
-        if (1 === \preg_match('~^\s*' . self::ADDRESS . '\s*$~i', $label)) {
-            $label = \str_rot13(\trim($label));
+        if (1 === \preg_match('~^' . self::ADDRESS . '$~i', $visible)) {
+            $label = \preg_replace_callback(
+                '~(<[^>]*>)|(' . self::ADDRESS . ')~i',
+                static fn (array $part): string => '' !== $part[1] ? $part[1] : \str_rot13($part[2]),
+                \str_contains($label, '<') ? $label : \trim($label),
+            ) ?? $label;
         }
 
         return \sprintf(

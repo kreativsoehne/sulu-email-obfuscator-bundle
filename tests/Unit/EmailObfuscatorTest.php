@@ -61,6 +61,26 @@ final class EmailObfuscatorTest extends TestCase
         $this->assertSame('<a class="btn" href="mailto:vasb@rknzcyr.pbz" data-obfuscated-email>Write to us</a>', $this->obfuscator->html('<a class="btn" href="mailto:info@example.com">Write to us</a>'));
     }
 
+    /**
+     * Icon and span around the address stay; only the address in the text is
+     * shifted, so the visible label is no longer readable in the source.
+     */
+    public function testAddressInsideMarkupOfTheLabelIsShifted(): void
+    {
+        $this->assertSame(
+            '<a class="card-link" href="mailto:vasb@rknzcyr.pbz" data-obfuscated-email><i class="icon" aria-hidden="true"></i><span class="label">vasb@rknzcyr.pbz</span></a>',
+            $this->obfuscator->html('<a class="card-link" href="mailto:info@example.com"><i class="icon" aria-hidden="true"></i><span class="label">info@example.com</span></a>'),
+        );
+    }
+
+    public function testWordInsideMarkupOfTheLabelStaysReadable(): void
+    {
+        $this->assertSame(
+            '<a href="mailto:vasb@rknzcyr.pbz" data-obfuscated-email><span>Write to us</span></a>',
+            $this->obfuscator->html('<a href="mailto:info@example.com"><span>Write to us</span></a>'),
+        );
+    }
+
     public function testSubjectStaysReadable(): void
     {
         $this->assertSame('<a href="mailto:vasb@rknzcyr.pbz?subject=Order" data-obfuscated-email>Write to us</a>', $this->obfuscator->html('<a href="mailto:info@example.com?subject=Order">Write to us</a>'));
