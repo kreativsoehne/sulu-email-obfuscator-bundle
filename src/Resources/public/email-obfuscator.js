@@ -12,6 +12,16 @@
         });
     }
 
+    function turnBackText(node) {
+        for (var child = node.firstChild; child; child = child.nextSibling) {
+            if (child.nodeType === 3) {
+                child.nodeValue = child.nodeValue.replace(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, rot13);
+            } else if (child.nodeType === 1) {
+                turnBackText(child);
+            }
+        }
+    }
+
     function decode() {
         var links = document.querySelectorAll('a[' + ATTRIBUTE + ']');
 
@@ -31,12 +41,13 @@
 
             link.setAttribute('href', 'mailto:' + rot13(address) + query);
 
-            // Same rule as on the server: only a label that is an address itself
-            // gets turned back, a word stays readable.
+            // Same rule as on the server: only a label whose visible text is an
+            // address gets turned back, a word stays readable. Markup inside the
+            // label (an icon, a span) stays, only its text is turned back.
             var label = link.textContent.trim();
 
             if (ADDRESS.test(label)) {
-                link.textContent = rot13(label);
+                turnBackText(link);
             }
 
             link.removeAttribute(ATTRIBUTE);
